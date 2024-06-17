@@ -41,6 +41,7 @@ jobs:
         USER_NAME: ${{ secrets.EC2_USERNAME }}
         
       run: |
+        sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
         # sudo chmod 700 /root/.ssh
         # sudo chmod 600 /root/.ssh/authorized_keys
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
