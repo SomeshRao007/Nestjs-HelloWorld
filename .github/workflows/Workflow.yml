@@ -41,8 +41,8 @@ jobs:
         USER_NAME: ${{ secrets.EC2_USERNAME }}
         
       run: |
-        chmod 700 /root/.ssh
-        chmod 600 /root/.ssh/authorized_keys
+        sudo chmod 700 /root/.ssh
+        sudo chmod 600 /root/.ssh/authorized_keys
         echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
         cd ~/nestjs-hello-world &&
