@@ -35,7 +35,7 @@ jobs:
       run: npm test
 
     - name: Prepare SSH Key
-        run: |
+      run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > key.pem
           chmod 600 key.pem  
           
