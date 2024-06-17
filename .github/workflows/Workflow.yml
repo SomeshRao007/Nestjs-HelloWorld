@@ -36,8 +36,8 @@ jobs:
 
     - name: Prepare SSH Key
       run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > key.pem
-          chmod 600 key.pem  
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.ppk
+          chmod 600 key.ppk  
           
     - name: Deploy to EC2
       env:
