@@ -1,0 +1,50 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI ON EC2
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "master" branch
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Build
+      run: npm run build
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Deploy to EC2
+      env:
+        PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        HOSTNAME: ${{ secrets.EC2_HOST }}
+        USER_NAME: ${{ secrets.EC2_USERNAME }}
+        
+      run: |
+        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+          cd ~/nestjs-hello-world &&
+          git pull origin main &&
+          npm ci &&
+          npm run build &&
+          pm2 restart dist/main.js
+        '
+
