@@ -19,6 +19,18 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+
+    - name: Setup SSH Keys and known_hosts
+      env:
+           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: |
+             ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+             ssh-add - <<< "${{ secrets.EC2_SSH_KEY }}"
+
+    - name: Some task that fetches dependencies
+      env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+      run: ./fetch-deps.sh
     
     - name: Use Node.js
       uses: actions/setup-node@v2
@@ -41,9 +53,7 @@ jobs:
         USER_NAME: ${{ secrets.EC2_USERNAME }}
         
       run: |
-        sudo chmod 700 /root/.ssh
-        sudo chmod 600 /root/.ssh/authorized_keys
-        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        
         ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
         cd ~/nestjs-hello-world &&
         git pull origin main &&
