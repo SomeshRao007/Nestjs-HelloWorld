@@ -19,7 +19,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    
+   
     - name: Use Node.js
       uses: actions/setup-node@v2
       with:
@@ -33,7 +33,12 @@ jobs:
       
     - name: Run tests
       run: npm test
-      
+
+    - name: Prepare SSH Key
+      run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > key.pem
+          chmod 600 key.pem  
+          
     - name: Deploy to EC2
       env:
         PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
@@ -41,11 +46,11 @@ jobs:
         USER_NAME: ${{ secrets.EC2_USERNAME }}
         
       run: |
-        sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+        # sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
         # sudo chmod 700 /root/.ssh
         # sudo chmod 600 /root/.ssh/authorized_keys
-        echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-        ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
+        # echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+        ssh -i key.pem -o StrictHostKeyChecking=no ${USER_NAME}@${HOSTNAME} '
         cd ~/nestjs-hello-world &&
         git pull origin main &&
         npm install &&
